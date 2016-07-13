@@ -36,6 +36,12 @@ import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.muzei.WeatherMuzeiSource;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +58,7 @@ import java.net.URL;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
+public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     public static final String ACTION_DATA_UPDATED =
             "com.example.android.sunshine.app.ACTION_DATA_UPDATED";
@@ -63,6 +69,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
 
+    GoogleApiClient mGoogleApiClient;
+
 
     private static final String[] NOTIFY_WEATHER_PROJECTION = new String[] {
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
@@ -70,6 +78,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
             WeatherContract.WeatherEntry.COLUMN_SHORT_DESC
     };
+
+
 
     // these indices must match the projection
     private static final int INDEX_WEATHER_ID = 0;
@@ -89,6 +99,42 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Thread sendToDL = new Thread() {
+
+            String str = "Dummy!";
+            @Override
+            public void run() {
+
+
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                for (Node node : nodes.getNodes()) {
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", str.getBytes()).await();
+                    if (result.getStatus().isSuccess()) {
+                        Log.v("myTag", "Message: {" + str + "} sent to: " + node.getDisplayName());
+                    }
+                    else {
+                        // Log an error
+                        Log.v("myTag", "ERROR: failed to send Message");
+                    }
+                }
+
+            }
+        };
+        sendToDL.start();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 
     @Override
@@ -347,6 +393,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 updateWidgets();
                 updateMuzei();
                 notifyWeather();
+                mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                        .addApi(Wearable.API)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        .build();
+                mGoogleApiClient.connect();
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
