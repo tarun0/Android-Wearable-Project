@@ -38,9 +38,10 @@ import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.muzei.WeatherMuzeiSource;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
@@ -68,6 +69,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
+
+    String sendLow;
+    String sendHigh;
+    String sendArtId;
 
     GoogleApiClient mGoogleApiClient;
 
@@ -104,23 +109,38 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     @Override
     public void onConnected(Bundle bundle) {
         Thread sendToDL = new Thread() {
-
+            DataMap dataMap;
             String str = "Dummy!";
             @Override
             public void run() {
 
+                dataMap = new DataMap();
+                dataMap.putString("high", sendHigh);
+                dataMap.putString("low", sendLow);
+                dataMap.putString("art", sendArtId);
 
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                PutDataMapRequest dataMapRequest =  PutDataMapRequest.create("/test");
+                dataMapRequest.getDataMap().putAll(dataMap);
+
+                PutDataRequest request = dataMapRequest.asPutDataRequest();
+
+                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(mGoogleApiClient, request).await();
+                if (result.getStatus().isSuccess()) {
+                    Log.e("DATA SEND", "SUCESS");
+                } else
+                    Log.e("DATA SEND", "FAILURE");
+
+                /*NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
                 for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", str.getBytes()).await();
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", Integer.toString(sendHigh).getBytes()).await();
                     if (result.getStatus().isSuccess()) {
-                        Log.v("myTag", "Message: {" + str + "} sent to: " + node.getDisplayName());
+                        Log.v("myTag", "Message: {" + sendHigh + "} sent to: " + node.getDisplayName());
                     }
                     else {
                         // Log an error
                         Log.v("myTag", "ERROR: failed to send Message");
                     }
-                }
+                }*/
 
             }
         };
@@ -375,6 +395,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, description);
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, weatherId);
 
+                if (i==0) {
+                    sendHigh = Integer.toString( (int) Math.round(high)) + "°";
+                    sendLow = Integer.toString((int) Math.round(low)) + "°";
+                    sendArtId = getArt(weatherId);
+                }
+
                 cVVector.add(weatherValues);
             }
 
@@ -393,6 +419,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 updateWidgets();
                 updateMuzei();
                 notifyWeather();
+
+
                 mGoogleApiClient = new GoogleApiClient.Builder(getContext())
                         .addApi(Wearable.API)
                         .addConnectionCallbacks(this)
@@ -426,6 +454,33 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
             context.startService(new Intent(ACTION_DATA_UPDATED)
                     .setClass(context, WeatherMuzeiSource.class));
         }
+    }
+
+    private String getArt(int weatherId) {
+        if (weatherId >= 200 && weatherId <= 232) {
+            return "storm";
+        } else if (weatherId >= 300 && weatherId <= 321) {
+            return "light_rain";
+        } else if (weatherId >= 500 && weatherId <= 504) {
+            return "rain";
+        } else if (weatherId == 511) {
+            return "snow";
+        } else if (weatherId >= 520 && weatherId <= 531) {
+            return "rain";
+        } else if (weatherId >= 600 && weatherId <= 622) {
+            return "snow";
+        } else if (weatherId >= 701 && weatherId <= 761) {
+            return "fog";
+        } else if (weatherId == 761 || weatherId == 781) {
+            return "storm";
+        } else if (weatherId == 800) {
+            return "clear";
+        } else if (weatherId == 801) {
+            return "light_clouds";
+        } else if (weatherId >= 802 && weatherId <= 804) {
+            return "clouds";
+        }
+        return null;
     }
 
     private void notifyWeather() {

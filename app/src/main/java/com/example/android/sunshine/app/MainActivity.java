@@ -20,8 +20,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
@@ -37,13 +35,8 @@ import com.example.android.sunshine.app.gcm.RegistrationIntentService;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
 
-public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -52,67 +45,6 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
     private boolean mTwoPane;
     private String mLocation;
-    private GoogleApiClient mGoogleApiClient;
-
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Thread sendToDL = new Thread() {
-
-            String str = "Dummy!";
-            @Override
-            public void run() {
-
-
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", str.getBytes()).await();
-                    if (result.getStatus().isSuccess()) {
-                        Log.v("myTag", "Message: {" + str + "} sent to: " + node.getDisplayName());
-                    }
-                    else {
-                        // Log an error
-                        Log.v("myTag", "ERROR: failed to send Message");
-                    }
-                }
-
-            }
-        };
-        sendToDL.start();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-   /* public void test (int i) {
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/test");
-        putDataMapRequest.getDataMap().putInt("i", 99);
-
-        PutDataRequest request = putDataMapRequest.asPutDataRequest();
-
-        Wearable.DataApi.putDataItem(mGoogleApiClient,request )
-                .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                    @Override
-                    public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
-                        if (!dataItemResult.getStatus().isSuccess()) {
-                            Log.e("TEST", "Failed!");
-                        } else Log.e("TEST", "Success!");
-                    }
-                });
-    }*/
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,17 +90,6 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         }
 
         SunshineSyncAdapter.initializeSyncAdapter(this);
-
-        /**
-         * Test DATA ITEM for Wearable
-         */
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
 
 
         // If Google Play Services is up to date, we'll want to register GCM. If it is not, we'll

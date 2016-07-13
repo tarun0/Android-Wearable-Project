@@ -57,7 +57,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
      */
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
 
-    public static String test;
+    public static String high;
+    public static String low;
+    public static String artId;
     @Override
     public Engine onCreateEngine() {
         return new Engine();
@@ -99,9 +101,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
         private Bitmap mBackgroundBitmap;
         private Bitmap mGrayBackgroundBitmap;
 
+        private Paint highTemp;
+        private Paint lowTemp;
+        private Paint artPaint;
+        private Bitmap artBitmap;
+
         private boolean mAmbient;
         private boolean mLowBitAmbient;
         private boolean mBurnInProtection;
+        Float scale;
 
         private Rect mPeekCardBounds = new Rect();
 
@@ -153,12 +161,26 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
-            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+
+            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.now_watch_face);
 
             /* Set defaults for colors */
             mWatchHandColor = Color.WHITE;
             mWatchHandHighlightColor = Color.RED;
             mWatchHandShadowColor = Color.BLACK;
+
+            highTemp = new Paint();
+            highTemp.setColor(Color.CYAN);
+            highTemp.setTextSize(50);
+            highTemp.setAntiAlias(true);
+
+            lowTemp = new Paint();
+            lowTemp.setColor(Color.GREEN);
+            lowTemp.setTextSize(35);
+            lowTemp.setAntiAlias(true);
+
+            artPaint = new Paint();
+
 
             mHourPaint = new Paint();
             mHourPaint.setColor(mWatchHandColor);
@@ -318,8 +340,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
 
             /* Scale loaded background image (more efficient) if surface dimensions change. */
-            float scale = ((float) width) / (float) mBackgroundBitmap.getWidth();
-
+            scale = ((float) width) / (float) mBackgroundBitmap.getWidth();
             mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
                     (int) (mBackgroundBitmap.getWidth() * scale),
                     (int) (mBackgroundBitmap.getHeight() * scale), true);
@@ -358,6 +379,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "onDraw");
             }
+
             canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
@@ -369,13 +391,46 @@ public class MyWatchFace extends CanvasWatchFaceService {
             } else {
                 canvas.drawBitmap(mBackgroundBitmap, 0, 0, mBackgroundPaint);
                 //Log.e("in Ondraw", test);
-                if (test != null) {
-                    Paint p = new Paint();
-                    p.setColor(Color.WHITE);
-                    p.setTextSize(20);
-                    canvas.drawText(test, 50, 50, p);
-                    Log.e("in Ondraw IN LOOP", test);
+                if (high != null) {
 
+                    Log.e("in Ondraw IN LOOP", high);
+
+                    try {
+                        switch (artId) {
+                            case "storm":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_storm);
+                                break;
+                            case "light_rain":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_light_rain);
+                                break;
+                            case "rain":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_rain);
+                                break;
+                            case "snow":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_snow);
+                                break;
+                            case "fog":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_fog);
+                                break;
+                            case "clear":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
+
+                                break;
+                            case "light_cloud":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_light_clouds);
+                                break;
+                            case "clouds":
+                                artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clouds);
+                                break;
+                        }
+
+                        canvas.drawBitmap(artBitmap, 100, 100, artPaint);
+                    } catch (NullPointerException npe) {
+                        Log.e("Watchface ArtId", "NULL");
+                    }
+
+                    canvas.drawText(high , 175, 150, highTemp);
+                    canvas.drawText(low , 215, 100, lowTemp);
                 }
             }
 
@@ -540,8 +595,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
     public class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            test = intent.getStringExtra("message");
-            Log.e("In OnReceiver", intent.getStringExtra("message"));
+            Bundle bundle = intent.getBundleExtra("test");
+
+            high = bundle.getString("high");
+            low = bundle.getString("low");
+            artId = bundle.getString("art");
+
+            Log.e("Received on Watchface", high + "");
 
         }
     }
