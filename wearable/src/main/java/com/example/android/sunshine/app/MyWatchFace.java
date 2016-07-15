@@ -177,7 +177,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
 
-            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.my);
+            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.background);
 
             /* Set defaults for colors */
             mWatchHandColor = Color.WHITE;
@@ -498,9 +498,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
                                 break;
                             case "clear":
                                 artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
-
                                 break;
-                            case "light_cloud":
+                            case "light_clouds":
                                 artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_light_clouds);
                                 break;
                             case "clouds":
@@ -511,7 +510,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                         artBitmap = Bitmap.createScaledBitmap(artBitmap, 90, 75, true);
                         canvas.drawBitmap(artBitmap, 110, 10, artPaint);
                     } catch (NullPointerException npe) {
-                        Log.e("Watchface ArtId", "NULL");
+                        Log.e("Watchface ArtId", artId);
                     }
 
                     canvas.drawText(high , 226, 198, highTemp);

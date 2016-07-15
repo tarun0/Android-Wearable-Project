@@ -468,7 +468,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
         } else if (weatherId >= 802 && weatherId <= 804) {
             return "clouds";
         }
-        return null;
+        return Integer.toString(weatherId);
     }
 
     private void notifyWeather() {
