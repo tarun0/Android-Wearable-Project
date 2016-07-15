@@ -177,7 +177,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
 
-            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.my);
+            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.background);
 
             /* Set defaults for colors */
             mWatchHandColor = Color.WHITE;
@@ -507,9 +507,10 @@ public class MyWatchFace extends CanvasWatchFaceService {
                                 artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clouds);
                                 break;
                         }
-
+                        Log.d("Before creating bitmap", artId);
                         artBitmap = Bitmap.createScaledBitmap(artBitmap, 90, 75, true);
                         canvas.drawBitmap(artBitmap, 110, 10, artPaint);
+                        Log.d("Bitmap", "Should be created");
                     } catch (NullPointerException npe) {
                         Log.e("Watchface ArtId", "NULL");
                     }
