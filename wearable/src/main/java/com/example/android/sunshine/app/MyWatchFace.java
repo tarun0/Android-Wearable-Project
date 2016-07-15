@@ -467,11 +467,11 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 if (high != null) {
                     canvas.drawText(high , 226, 198, highTemp);
                     canvas.drawText(low , 218, 227, lowTemp);
-                    canvas.drawText("High", 65, 195, textHigh);
-                    canvas.drawText("Low", 75, 225, textLow);
+                    canvas.drawText(getResources().getString(R.string.high), 65, 195, textHigh);
+                    canvas.drawText(getResources().getString(R.string.low), 75, 225, textLow);
                 }
 
-                canvas.drawText("Date", 53, 165, textDate);
+                canvas.drawText(getResources().getString(R.string.date), 53, 165, textDate);
 
                 today = new Date();
                 today.setTime(System.currentTimeMillis());
