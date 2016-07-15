@@ -22,7 +22,7 @@ public class MyService extends WearableListenerService {
 
         DataMap dataMap;
         for (DataEvent event: dataEvents) {
-            if (event.getType() == DataEvent.TYPE_CHANGED) {
+           // if (event.getType() == DataEvent.TYPE_CHANGED) {
                 String path = event.getDataItem().getUri().getPath();
                 if (path.equals("/test")) {
                     dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
@@ -33,7 +33,7 @@ public class MyService extends WearableListenerService {
 
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 }
-            }
+            //}
         }
     }
 

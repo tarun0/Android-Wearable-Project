@@ -37,10 +37,13 @@ import android.support.v7.graphics.Palette;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -104,7 +107,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
         private Paint highTemp;
         private Paint lowTemp;
         private Paint artPaint;
+        private Paint textDate;
+        private Paint textHigh;
+        private Paint textLow;
         private Bitmap artBitmap;
+
+        private Paint todayDate;
+        private Date today;
+        private  Calendar calendar;
+        java.text.DateFormat dateFormat;
 
         private boolean mAmbient;
         private boolean mLowBitAmbient;
@@ -151,6 +162,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+                    .setHotwordIndicatorGravity(Gravity.TOP | Gravity.LEFT)
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .build());
@@ -158,11 +171,13 @@ public class MyWatchFace extends CanvasWatchFaceService {
             LocalBroadcastManager.getInstance(MyWatchFace.this)
                     .registerReceiver(new MessageReceiver(), new IntentFilter(Intent.ACTION_SEND));
 
-
+            calendar = Calendar.getInstance();
+            dateFormat = DateFormat.getDateFormat(MyWatchFace.this);
+            dateFormat.setCalendar(calendar);
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
 
-            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.now_watch_face);
+            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.my);
 
             /* Set defaults for colors */
             mWatchHandColor = Color.WHITE;
@@ -170,17 +185,42 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mWatchHandShadowColor = Color.BLACK;
 
             highTemp = new Paint();
-            highTemp.setColor(Color.CYAN);
-            highTemp.setTextSize(50);
+            highTemp.setColor(getResources().getColor(R.color.digital_text));
+            highTemp.setTextSize(17);
             highTemp.setAntiAlias(true);
+            highTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
 
             lowTemp = new Paint();
-            lowTemp.setColor(Color.GREEN);
-            lowTemp.setTextSize(35);
+            lowTemp.setColor(getResources().getColor(R.color.digital_text));
+            lowTemp.setTextSize(17);
             lowTemp.setAntiAlias(true);
+            lowTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+
+            todayDate = new Paint();
+            todayDate.setColor(getResources().getColor(R.color.digital_text));
+            todayDate.setTextSize(16);
+            todayDate.setAntiAlias(true);
+            todayDate.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+
+            textDate = new Paint();
+            textDate.setColor(Color.WHITE);
+            textDate.setTextSize(16);
+            textDate.setAntiAlias(true);
+            textDate.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
+
+            textHigh = new Paint();
+            textHigh.setColor(Color.WHITE);
+            textHigh.setTextSize(16);
+            textHigh.setAntiAlias(true);
+            textHigh.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.GREEN);
+
+            textLow = new Paint();
+            textLow.setColor(Color.WHITE);
+            textLow.setTextSize(15);
+            textLow.setAntiAlias(true);
+            textLow.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
 
             artPaint = new Paint();
-
 
             mHourPaint = new Paint();
             mHourPaint.setColor(mWatchHandColor);
@@ -390,11 +430,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawBitmap(mGrayBackgroundBitmap, 0, 0, mBackgroundPaint);
             } else {
                 canvas.drawBitmap(mBackgroundBitmap, 0, 0, mBackgroundPaint);
-                //Log.e("in Ondraw", test);
                 if (high != null) {
-
-                    Log.e("in Ondraw IN LOOP", high);
-
                     try {
                         switch (artId) {
                             case "storm":
@@ -424,13 +460,35 @@ public class MyWatchFace extends CanvasWatchFaceService {
                                 break;
                         }
 
-                        canvas.drawBitmap(artBitmap, 100, 100, artPaint);
+                        artBitmap = Bitmap.createScaledBitmap(artBitmap, 90, 75, true);
+                        canvas.drawBitmap(artBitmap, 110, 10, artPaint);
                     } catch (NullPointerException npe) {
                         Log.e("Watchface ArtId", "NULL");
                     }
 
-                    canvas.drawText(high , 175, 150, highTemp);
-                    canvas.drawText(low , 215, 100, lowTemp);
+                    canvas.drawText(high , 226, 198, highTemp);
+                    canvas.drawText(low , 218, 227, lowTemp);
+                    canvas.drawText("High", 65, 195, textHigh);
+                    canvas.drawText("Date", 53, 165, textDate);
+                    canvas.drawText("Low", 75, 225, textLow);
+                    today = new Date();
+                    today.setTime(System.currentTimeMillis());
+                    canvas.drawText(dateFormat.format(today), 205, 165, todayDate);
+
+                }
+                else {
+                    artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clouds);
+                    artBitmap = Bitmap.createScaledBitmap(artBitmap, 90, 75, true);
+                    canvas.drawBitmap(artBitmap, 110, 10, artPaint);
+                    canvas.drawText("No" , 226, 198, highTemp);
+                    canvas.drawText("Data" , 218, 227, lowTemp);
+                    canvas.drawText("High", 65, 195, textHigh);
+                    canvas.drawText("Date", 53, 165, textDate);
+                    canvas.drawText("Low", 75, 225, textLow);
+                    today = new Date();
+                    today.setTime(System.currentTimeMillis());
+                    canvas.drawText(dateFormat.format(today), 205, 165, todayDate);
+
                 }
             }
 

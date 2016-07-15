@@ -110,7 +110,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     public void onConnected(Bundle bundle) {
         Thread sendToDL = new Thread() {
             DataMap dataMap;
-            String str = "Dummy!";
             @Override
             public void run() {
 
@@ -129,19 +128,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                     Log.e("DATA SEND", "SUCESS");
                 } else
                     Log.e("DATA SEND", "FAILURE");
-
-                /*NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", Integer.toString(sendHigh).getBytes()).await();
-                    if (result.getStatus().isSuccess()) {
-                        Log.v("myTag", "Message: {" + sendHigh + "} sent to: " + node.getDisplayName());
-                    }
-                    else {
-                        // Log an error
-                        Log.v("myTag", "ERROR: failed to send Message");
-                    }
-                }*/
-
             }
         };
         sendToDL.start();
@@ -396,6 +382,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, weatherId);
 
                 if (i==0) {
+                    Log.e("assigning values", "!");
                     sendHigh = Integer.toString( (int) Math.round(high)) + "°";
                     sendLow = Integer.toString((int) Math.round(low)) + "°";
                     sendArtId = getArt(weatherId);
@@ -427,6 +414,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                         .addOnConnectionFailedListener(this)
                         .build();
                 mGoogleApiClient.connect();
+                Log.e("Connecting", "...");
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
