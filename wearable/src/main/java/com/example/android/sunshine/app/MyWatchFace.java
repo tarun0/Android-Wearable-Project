@@ -498,9 +498,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
                                 break;
                             case "clear":
                                 artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
-
                                 break;
-                            case "light_cloud":
+                            case "light_clouds":
                                 artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_light_clouds);
                                 break;
                             case "clouds":
@@ -512,7 +511,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                         canvas.drawBitmap(artBitmap, 110, 10, artPaint);
                         Log.d("Bitmap", "Should be created");
                     } catch (NullPointerException npe) {
-                        Log.e("Watchface ArtId", "NULL");
+                        Log.e("Watchface ArtId", artId);
                     }
 
                     canvas.drawText(high , 226, 198, highTemp);
