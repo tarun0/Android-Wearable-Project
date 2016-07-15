@@ -184,41 +184,14 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mWatchHandHighlightColor = Color.RED;
             mWatchHandShadowColor = Color.BLACK;
 
-            highTemp = new Paint();
-            highTemp.setColor(getResources().getColor(R.color.digital_text));
-            highTemp.setTextSize(17);
-            highTemp.setAntiAlias(true);
-            highTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
-
-            lowTemp = new Paint();
-            lowTemp.setColor(getResources().getColor(R.color.digital_text));
-            lowTemp.setTextSize(17);
-            lowTemp.setAntiAlias(true);
-            lowTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
-
-            todayDate = new Paint();
-            todayDate.setColor(getResources().getColor(R.color.digital_text));
-            todayDate.setTextSize(16);
-            todayDate.setAntiAlias(true);
-            todayDate.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
-
-            textDate = new Paint();
-            textDate.setColor(Color.WHITE);
-            textDate.setTextSize(16);
-            textDate.setAntiAlias(true);
-            textDate.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
-
-            textHigh = new Paint();
-            textHigh.setColor(Color.WHITE);
-            textHigh.setTextSize(16);
-            textHigh.setAntiAlias(true);
-            textHigh.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.GREEN);
-
             textLow = new Paint();
-            textLow.setColor(Color.WHITE);
-            textLow.setTextSize(15);
-            textLow.setAntiAlias(true);
-            textLow.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
+            textHigh = new Paint();
+            textDate = new Paint();
+            lowTemp = new Paint();
+            highTemp = new Paint();
+            todayDate = new Paint();
+
+            setAllPaints();
 
             artPaint = new Paint();
 
@@ -270,6 +243,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     });
 
             mCalendar = Calendar.getInstance();
+
         }
 
         @Override
@@ -321,12 +295,36 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 mSecondPaint.setAntiAlias(false);
                 mTickAndCirclePaint.setAntiAlias(false);
 
+                textDate.clearShadowLayer();
+                textHigh.clearShadowLayer();
+                textLow.clearShadowLayer();
+                highTemp.clearShadowLayer();
+                lowTemp.clearShadowLayer();
+                todayDate.clearShadowLayer();
+
+                textDate.setColor(Color.WHITE);
+                textHigh.setColor(Color.WHITE);
+                textLow.setColor(Color.WHITE);
+                highTemp.setColor(Color.WHITE);
+                lowTemp.setColor(Color.WHITE);
+                todayDate.setColor(Color.WHITE);
+
+                textDate.setAntiAlias(false);
+                textHigh.setAntiAlias(false);
+                textLow.setAntiAlias(false);
+                highTemp.setAntiAlias(false);
+                lowTemp.setAntiAlias(false);
+                todayDate.setAntiAlias(false);
+
                 mHourPaint.clearShadowLayer();
                 mMinutePaint.clearShadowLayer();
                 mSecondPaint.clearShadowLayer();
                 mTickAndCirclePaint.clearShadowLayer();
 
             } else {
+
+                setAllPaints();
+
                 mHourPaint.setColor(mWatchHandColor);
                 mMinutePaint.setColor(mWatchHandColor);
                 mSecondPaint.setColor(mWatchHandHighlightColor);
@@ -342,6 +340,44 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 mSecondPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, mWatchHandShadowColor);
                 mTickAndCirclePaint.setShadowLayer(SHADOW_RADIUS, 0, 0, mWatchHandShadowColor);
             }
+        }
+
+        private  void setAllPaints() {
+
+            highTemp.setColor(getResources().getColor(R.color.digital_text));
+            highTemp.setTextSize(17);
+            highTemp.setAntiAlias(true);
+            highTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+
+
+            lowTemp.setColor(getResources().getColor(R.color.digital_text));
+            lowTemp.setTextSize(17);
+            lowTemp.setAntiAlias(true);
+            lowTemp.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+
+
+            todayDate.setColor(getResources().getColor(R.color.digital_text));
+            todayDate.setTextSize(16);
+            todayDate.setAntiAlias(true);
+            todayDate.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+
+
+            textDate.setColor(Color.WHITE);
+            textDate.setTextSize(16);
+            textDate.setAntiAlias(true);
+            textDate.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
+
+
+            textHigh.setColor(Color.WHITE);
+            textHigh.setTextSize(16);
+            textHigh.setAntiAlias(true);
+            textHigh.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.GREEN);
+
+
+            textLow.setColor(Color.WHITE);
+            textLow.setTextSize(15);
+            textLow.setAntiAlias(true);
+            textLow.setShadowLayer(SHADOW_RADIUS, 0, 0, getResources().getColor(R.color.digital_text));
         }
 
         @Override
@@ -428,6 +464,18 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawColor(Color.BLACK);
             } else if (mAmbient) {
                 canvas.drawBitmap(mGrayBackgroundBitmap, 0, 0, mBackgroundPaint);
+                if (high != null) {
+                    canvas.drawText(high , 226, 198, highTemp);
+                    canvas.drawText(low , 218, 227, lowTemp);
+                    canvas.drawText("High", 65, 195, textHigh);
+                    canvas.drawText("Low", 75, 225, textLow);
+                }
+
+                canvas.drawText("Date", 53, 165, textDate);
+
+                today = new Date();
+                today.setTime(System.currentTimeMillis());
+                canvas.drawText(dateFormat.format(today), 205, 165, todayDate);
             } else {
                 canvas.drawBitmap(mBackgroundBitmap, 0, 0, mBackgroundPaint);
                 if (high != null) {
@@ -477,9 +525,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
                 }
                 else {
-                    artBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.art_clouds);
-                    artBitmap = Bitmap.createScaledBitmap(artBitmap, 90, 75, true);
-                    canvas.drawBitmap(artBitmap, 110, 10, artPaint);
+
                     canvas.drawText("No" , 226, 198, highTemp);
                     canvas.drawText("Data" , 218, 227, lowTemp);
                     canvas.drawText("High", 65, 195, textHigh);
@@ -634,21 +680,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    /*public class MyService extends WearableListenerService {
-        public MyService() {
-        }
-
-        @Override
-        public void onMessageReceived(MessageEvent messageEvent) {
-            if (messageEvent.getPath().equals("/test")) {
-                Log.e("DATA Received", messageEvent.getData().toString());
-
-                test = messageEvent.getData().toString();
-            }
-            else super.onMessageReceived(messageEvent);
-        }
-    }
-*/
 
     public class MessageReceiver extends BroadcastReceiver {
         @Override
@@ -658,8 +689,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             high = bundle.getString("high");
             low = bundle.getString("low");
             artId = bundle.getString("art");
-
-            Log.e("Received on Watchface", high + "");
+            Log.d("Received on Watchface", high + "");
 
         }
     }

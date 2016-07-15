@@ -36,7 +36,7 @@ import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback /*, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener*/ {
+public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback  {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -45,58 +45,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
     private boolean mTwoPane;
     private String mLocation;
-   // GoogleApiClient mGoogleApiClient;
 
-   /* @Override
-    public void onConnected(Bundle bundle) {
-        Thread sendToDL = new Thread() {
-            DataMap dataMap;
-            @Override
-            public void run() {
-
-                dataMap = new DataMap();
-                dataMap.putString("high", "20°");
-                dataMap.putString("low", "05°");
-                dataMap.putString("art", "storm");
-
-                PutDataMapRequest dataMapRequest =  PutDataMapRequest.create("/test");
-                dataMapRequest.getDataMap().putAll(dataMap);
-
-                PutDataRequest request = dataMapRequest.asPutDataRequest();
-
-                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(mGoogleApiClient, request).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.e("Main Activity DATA SEND", request.toString() + "||" + new String(request.getData()));
-                } else
-                    Log.e("DATA SEND", "FAILURE");
-
-                *//*NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/test", Integer.toString(sendHigh).getBytes()).await();
-                    if (result.getStatus().isSuccess()) {
-                        Log.v("myTag", "Message: {" + sendHigh + "} sent to: " + node.getDisplayName());
-                    }
-                    else {
-                        // Log an error
-                        Log.v("myTag", "ERROR: failed to send Message");
-                    }
-                }*//*
-
-            }
-        };
-        sendToDL.start();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

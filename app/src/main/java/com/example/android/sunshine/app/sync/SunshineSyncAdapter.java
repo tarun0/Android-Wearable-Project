@@ -125,9 +125,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
 
                 DataApi.DataItemResult result = Wearable.DataApi.putDataItem(mGoogleApiClient, request).await();
                 if (result.getStatus().isSuccess()) {
-                    Log.e("DATA SEND", "SUCESS");
+                    Log.d("DATA SEND", "SUCCESS");
                 } else
-                    Log.e("DATA SEND", "FAILURE");
+                    Log.d("DATA SEND", "FAILURE");
             }
         };
         sendToDL.start();
@@ -382,7 +382,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, weatherId);
 
                 if (i==0) {
-                    Log.e("assigning values", "!");
+
                     sendHigh = Integer.toString( (int) Math.round(high)) + "°";
                     sendLow = Integer.toString((int) Math.round(low)) + "°";
                     sendArtId = getArt(weatherId);
@@ -414,7 +414,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                         .addOnConnectionFailedListener(this)
                         .build();
                 mGoogleApiClient.connect();
-                Log.e("Connecting", "...");
+                Log.d("Connecting", "...");
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
